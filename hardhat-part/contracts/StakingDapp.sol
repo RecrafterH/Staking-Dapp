@@ -1,6 +1,8 @@
 // SPDX-Licnese-Identifier: MIT;
 pragma solidity ^0.8.9;
 
+import "hardhat/console.sol";
+
 interface IBluedog {
     function transfer(address to, uint256 amount) external returns (bool);
 
@@ -26,7 +28,7 @@ contract StakingDapp {
     mapping(address => uint256) public deadlines;
     mapping(address => uint256) public startingClaim;
 
-    uint256 apyPerSecond = 1;
+    uint256 apy = 50;
 
     event Stake(address indexed sender, uint256 amount);
 
@@ -59,7 +61,7 @@ contract StakingDapp {
     }
 
     modifier tokenStaked() {
-        require(balances[msg.sender] > 0);
+        require(balances[msg.sender] > 0, "No token staked");
         _;
     }
 
@@ -78,7 +80,13 @@ contract StakingDapp {
     function claim() public tokenStaked {
         uint256 stakedAmount = balances[msg.sender];
         uint256 timeStaked = block.timestamp - startingClaim[msg.sender];
-        uint256 rewardAmount = stakedAmount * (timeStaked * apyPerSecond);
+        uint256 rewardAmount = ((stakedAmount) * ((timeStaked) * apy)) /
+            100 /
+            60 /
+            60 /
+            24 /
+            365;
+        console.log(rewardAmount);
         startingClaim[msg.sender] = block.timestamp;
         balances[msg.sender] += rewardAmount;
     }

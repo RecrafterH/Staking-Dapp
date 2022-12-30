@@ -1,5 +1,5 @@
 const { expect } = require("chai");
-const { ethers } = require("hardhat");
+const { network, ethers } = require("hardhat");
 
 describe("Testing BlueDog", () => {
   it("mints 1000 token and sends them to the owner", async () => {
@@ -46,6 +46,21 @@ describe("StakindDapp tests", function () {
       expect(total.toString()).to.equal("1000");
       const withdrawTimeLeft = await stakingContract.withdrawTimeLeft();
       expect((withdrawTimeLeft / 60 / 60 / 24).toString()).to.equal("100");
+    });
+    it("cant claim token if I havent staked", async () => {
+      expect(stakingContract.claim()).to.be.reverted;
+    });
+
+    it("The user can claim his rewards", async () => {
+      await stakingContract.stake(1000, 100);
+
+      await network.provider.send("evm_increaseTime", [365 * 60 * 60 * 24]);
+      await network.provider.request({ method: "evm_mine", params: [] });
+      const rewards = await stakingContract.claim();
+      const [deployer] = await ethers.getSigners(0);
+      console.log(rewards.toString());
+      const balance = await stakingContract.getStakedBalance(deployer.address);
+      expect(balance.toString()).to.equal("1500");
     });
   });
 });
