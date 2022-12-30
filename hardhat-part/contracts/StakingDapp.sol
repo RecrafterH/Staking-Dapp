@@ -16,6 +16,8 @@ interface IBluedog {
 contract StakingDapp {
     IBluedog bluedog;
 
+    uint256 public totalStaked;
+
     constructor(address _bluedog) {
         bluedog = IBluedog(_bluedog);
     }
@@ -29,14 +31,15 @@ contract StakingDapp {
     event Stake(address indexed sender, uint256 amount);
 
     function stake(uint256 amount, uint256 time) public {
-        require(amount >= bluedog.balanceOf(msg.sender), "Not enough token");
+        require(amount <= bluedog.balanceOf(msg.sender), "Not enough token");
         uint256 timestamp = block.timestamp;
-        startingClaim[msg.sender];
+        startingClaim[msg.sender] = timestamp;
         uint256 deadline = block.timestamp + time * 60 * 60 * 24;
         deadlines[msg.sender] = deadline;
         bool success = bluedog.transfer(address(this), amount);
         require(success, "Transaction failed");
         balances[msg.sender] += amount;
+        totalStaked += amount;
         emit Stake(msg.sender, amount);
     }
 
@@ -76,6 +79,11 @@ contract StakingDapp {
         uint256 stakedAmount = balances[msg.sender];
         uint256 timeStaked = block.timestamp - startingClaim[msg.sender];
         uint256 rewardAmount = stakedAmount * (timeStaked * apyPerSecond);
+        startingClaim[msg.sender] = block.timestamp;
         balances[msg.sender] += rewardAmount;
+    }
+
+    function getStakedBalance(address staker) external view returns (uint) {
+        return (balances[staker]);
     }
 }
