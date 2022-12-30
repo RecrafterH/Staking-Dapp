@@ -62,5 +62,18 @@ describe("StakindDapp tests", function () {
       const balance = await stakingContract.getStakedBalance(deployer.address);
       expect(balance.toString()).to.equal("1500");
     });
+    it("cant withdraw before the deadline is reached", async () => {
+      await stakingContract.stake(1000, 100);
+      expect(stakingContract.withdraw()).to.be.reverted;
+    });
+    it("lets the user withdraw after the time pasts", async () => {
+      await stakingContract.stake(1000, 100);
+      await network.provider.send("evm_increaseTime", [101 * 60 * 60 * 24]);
+      await network.provider.request({ method: "evm_mine", params: [] });
+      await stakingContract.withdraw();
+      const [deployer] = await ethers.getSigners(0);
+      const balance = await stakingContract.getStakedBalance(deployer.address);
+      expect(balance.toString()).to.equal("0");
+    });
   });
 });

@@ -69,11 +69,8 @@ contract StakingDapp {
         claim();
         uint256 individualBalance = balances[msg.sender];
         balances[msg.sender] = 0;
-        bool success = bluedog.transferFrom(
-            address(this),
-            msg.sender,
-            individualBalance
-        );
+
+        bool success = bluedog.transfer(msg.sender, individualBalance);
         require(success, "Withdrawl failed");
     }
 
