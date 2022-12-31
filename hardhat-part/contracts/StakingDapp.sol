@@ -28,7 +28,7 @@ contract StakingDapp {
     mapping(address => uint256) public deadlines;
     mapping(address => uint256) public startingClaim;
 
-    uint256 apy = 50;
+    uint256 apy = 1;
 
     event Stake(address indexed sender, uint256 amount);
 
@@ -77,18 +77,20 @@ contract StakingDapp {
     function claim() public tokenStaked {
         uint256 stakedAmount = balances[msg.sender];
         uint256 timeStaked = block.timestamp - startingClaim[msg.sender];
-        uint256 rewardAmount = ((stakedAmount) * ((timeStaked) * apy)) /
-            100 /
-            60 /
-            60 /
-            24 /
-            365;
+        uint256 rewardAmount = ((stakedAmount) * ((timeStaked) * apy)) / 100;
         console.log(rewardAmount);
         startingClaim[msg.sender] = block.timestamp;
         balances[msg.sender] += rewardAmount;
     }
 
-    function getStakedBalance(address staker) external view returns (uint) {
-        return (balances[staker]);
+    function getStakedBalance() external view returns (uint) {
+        return (balances[msg.sender]);
+    }
+
+    function getTokensToBeClaimed() public view returns (uint256) {
+        uint256 stakedAmount = balances[msg.sender];
+        uint256 timeStaked = block.timestamp - startingClaim[msg.sender];
+        uint256 rewardAmount = ((stakedAmount) * ((timeStaked) * apy)) / 100;
+        return rewardAmount;
     }
 }
