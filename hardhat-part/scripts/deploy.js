@@ -20,8 +20,8 @@ const main = async function () {
     10000000
   );
 };
-// bluedog 0xa513E6E4b8f2a923D98304ec87F64353C4D5C853
-// stake 0xa513E6E4b8f2a923D98304ec87F64353C4D5C853
+// bluedog 0x5FbDB2315678afecb367f032d93F642f64180aa3
+// stake 0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512
 main()
   .then(() => process.exit(0))
   .catch((error) => {
