@@ -30,9 +30,8 @@ contract StakingDapp {
     mapping(address => uint256) public balances;
     mapping(address => uint256) public deadlines;
     mapping(address => uint256) public startingClaim;
-    mapping(address => uint256) public stakeTimestamp;
 
-    uint256 public apy = 1;
+    uint256 public apy = 100;
 
     event Stake(address indexed sender, uint256 amount);
 
@@ -40,8 +39,7 @@ contract StakingDapp {
         require(amount <= bluedog.balanceOf(msg.sender), "Not enough token");
         uint256 timestamp = block.timestamp;
         startingClaim[msg.sender] = timestamp;
-        stakeTimestamp[msg.sender] = timestamp;
-        uint256 deadline = block.timestamp + time * 60 * 60 * 24;
+        uint256 deadline = block.timestamp + time /* * 60 * 60 * 24 */;
         deadlines[msg.sender] = deadline;
         bool success = bluedog.transfer(address(this), amount);
         require(success, "Transaction failed");
@@ -86,39 +84,16 @@ contract StakingDapp {
     }
 
     function claim() public tokenStaked {
-        if (block.timestamp > deadlines[msg.sender]) {
-            uint256 stakedAmount = balances[msg.sender];
-            uint256 timeStaked = (deadlines[msg.sender] -
-                startingClaim[msg.sender]);
-            uint256 rewardAmount = ((stakedAmount) * ((timeStaked) * apy)) /
-                100 /
-                365 /
-                24 /
-                60 /
-                60;
-            console.log(rewardAmount);
-            balances[msg.sender] += rewardAmount;
-        } else {
-            uint256 stakedAmount = balances[msg.sender];
-            uint256 timeStaked = (block.timestamp - startingClaim[msg.sender]);
-            uint256 rewardAmount = ((stakedAmount) * ((timeStaked) * apy)) /
-                100 /
-                365 /
-                24 /
-                60 /
-                60;
-            console.log(rewardAmount);
-            startingClaim[msg.sender] = block.timestamp;
-            balances[msg.sender] += rewardAmount;
-        }
+        uint256 stakedAmount = balances[msg.sender];
+        uint256 timeStaked = block.timestamp - startingClaim[msg.sender];
+        uint256 rewardAmount = ((stakedAmount) * ((timeStaked) * apy)) / 100;
+        console.log(rewardAmount);
+        startingClaim[msg.sender] = block.timestamp;
+        balances[msg.sender] += rewardAmount;
     }
 
     function calculateApy() internal {
-        if (totalStaked == 0) {
-            apy = totalRewardAmount / 1;
-        } else {
-            apy = totalRewardAmount / totalStaked;
-        }
+        apy = totalRewardAmount / totalStaked;
     }
 
     function addRewards(uint256 amount) external {
@@ -139,14 +114,8 @@ contract StakingDapp {
 
     function getTokensToBeClaimed() public view returns (uint256) {
         uint256 stakedAmount = balances[msg.sender];
-        uint256 timeStaked = (block.timestamp - startingClaim[msg.sender]);
-
-        uint256 rewardAmount = ((stakedAmount) * ((timeStaked) * apy)) /
-            100 /
-            365 /
-            24 /
-            60 /
-            60;
+        uint256 timeStaked = block.timestamp - startingClaim[msg.sender];
+        uint256 rewardAmount = ((stakedAmount) * ((timeStaked) * apy)) / 100;
         return rewardAmount;
     }
 

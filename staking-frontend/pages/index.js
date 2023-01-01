@@ -9,6 +9,7 @@ import {
   STAKING_CONTRACT_ADDRESS,
   STAKING_CONTRACT_ABI,
 } from "../constants";
+import { getDisplayName } from "next/dist/shared/lib/utils";
 
 export default function Home() {
   const zero = BigNumber.from(0);
@@ -18,6 +19,7 @@ export default function Home() {
   const [tokensToBeClaimed, setTokensToBeClaimed] = useState(zero);
   const [balanceOfBluedogToken, setBalanceOfBluedogToken] = useState(zero);
   const [timeUntilUnlock, setTimeUntilUntlock] = useState(zero);
+  const [stakeApy, setStakeApy] = useState(zero);
   const web3ModalRef = useRef();
   const ref = useRef(null);
   const ref1 = useRef(null);
@@ -60,12 +62,13 @@ export default function Home() {
       const balance = await stakeContract.getStakedBalance();
       const newBalance = balance.toString();
       setBalanceOfBluedogToken(balance);
-      console.log(balanceOfBluedogToken);
+
       document.getElementById(
         "tokenAmount"
       ).innerHTML = `You have ${balanceOfBluedogToken} staked`;
       getTimeUntilWithdraw();
       getClaimableToken();
+      getApy();
     } catch (err) {
       console.error(err);
       setBalanceOfBluedogToken(zero);
@@ -108,7 +111,7 @@ export default function Home() {
       const reward = await stakeContract.getTokensToBeClaimed();
 
       const newRewared = reward.toString();
-      console.log(newRewared);
+
       setTokensToBeClaimed(reward);
       document.getElementById(
         "rewardToken"
@@ -120,6 +123,30 @@ export default function Home() {
       document.getElementById(
         "rewardToken"
       ).innerHTML = `You can claim ${tokensToBeClaimed} tokens`;
+    }
+  };
+
+  const getApy = async () => {
+    try {
+      const provider = await getProviderOrSigner();
+      const stakeContract = new Contract(
+        STAKING_CONTRACT_ADDRESS,
+        STAKING_CONTRACT_ABI,
+        provider
+      );
+      console.log("APY");
+      const apy = await stakeContract.apy();
+      const newApy = apy.toString();
+
+      setStakeApy(newApy);
+
+      console.log(stakeApy);
+      document.getElementById(
+        "stakingApy"
+      ).innerHTML = `Stake your BlueDog token and earn an Apy of ${stakeApy} %`;
+    } catch (err) {
+      console.error(err);
+      setStakeApy(zero);
     }
   };
 
@@ -194,6 +221,7 @@ export default function Home() {
         providerOptions: {},
         disableInjectedProvider: false,
       });
+      getApy();
       connectWallet();
       getStakedTokenBalance();
       getTimeUntilWithdraw();
@@ -214,40 +242,51 @@ export default function Home() {
           Connect your wallet
         </button>
       </div>
-      <div className={styles.form}>
-        <div className={styles.form1}>
-          <label className={styles.label}>
-            <div>Amount to Stake:</div>
-            <input ref={ref} className="input" type="text" id="stakeAmount" />
-          </label>
-
-          <label className={styles.label}>
-            <div>time to stake in days</div>
-            <input ref={ref1} className="input" type="text" id="stakeTime" />
-          </label>
+      <div className={styles.middle}>
+        <div className={styles.apy} id="stakingApy">
+          Stake your BlueDog token and earn an Apy of 0 %
         </div>
-        <div className={styles.form1}>
-          <button onClick={stake} className={styles.button} id="stake">
-            Stake your token
-          </button>
-          <button onClick={claimTokens} className={styles.button} id="claim">
-            Claim your rewards
-          </button>
-          <button
-            onClick={withdrawToken}
-            className={styles.button}
-            id="withdraw"
-          >
-            Withdraw your token
-          </button>
+        <div className={styles.form}>
+          <div className={styles.form1}>
+            <label className={styles.label}>
+              <div>Amount to Stake:</div>
+              <input ref={ref} className="input" type="text" id="stakeAmount" />
+            </label>
+
+            <label className={styles.label}>
+              <div>Time to stake in days:</div>
+              <input ref={ref1} className="input" type="text" id="stakeTime" />
+            </label>
+          </div>
+          <div className={styles.form2}>
+            <button onClick={stake} className={styles.button} id="stake">
+              Stake your token
+            </button>
+
+            <button
+              onClick={withdrawToken}
+              className={styles.button}
+              id="withdraw"
+            >
+              Withdraw your token
+            </button>
+          </div>
+          <div className={styles.form2}>
+            <button onClick={claimTokens} className={styles.button} id="claim">
+              Claim your rewards
+            </button>
+          </div>
+        </div>
+        <div className={styles.form2}>
           <button
             onClick={getStakedTokenBalance}
-            className={styles.button}
+            className={styles.getButton}
             id="getBalance"
           >
             Get balance
           </button>
         </div>
+
         <div className={styles.list}>
           <div className={styles.result} id="tokenAmount">
             Amount of Tokens
@@ -260,9 +299,7 @@ export default function Home() {
           </div>
         </div>
       </div>
-      <div className={styles.footer}>
-        Register for our Newletter or Buy more BlueDog Token
-      </div>
+      <div className={styles.footer}>Made by Recrafter</div>
     </div>
   );
 }

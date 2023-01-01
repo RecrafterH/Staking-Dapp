@@ -41,6 +41,7 @@ describe("StakindDapp tests", function () {
       await stakingContract.stake(1000, 100);
       const [deployer] = await ethers.getSigners(0);
       const balance = await stakingContract.getStakedBalance();
+      console.log(balance);
       const total = await stakingContract.totalStaked();
       expect(balance.toString()).to.equal("1000");
       expect(total.toString()).to.equal("1000");
@@ -52,15 +53,16 @@ describe("StakindDapp tests", function () {
     });
 
     it("The user can claim his rewards", async () => {
-      await stakingContract.stake(1000, 100);
+      await stakingContract.stake(1000, 700);
+      await stakingContract.addRewards(100000);
 
-      await network.provider.send("evm_increaseTime", [100]);
+      await network.provider.send("evm_increaseTime", [60 * 60 * 24 * 365]);
       await network.provider.request({ method: "evm_mine", params: [] });
       const rewards = await stakingContract.claim();
       const [deployer] = await ethers.getSigners(0);
 
       const balance = await stakingContract.getStakedBalance();
-      expect(balance.toString()).to.equal("2010");
+      expect(balance.toString()).to.equal("1002");
     });
     it("cant withdraw before the deadline is reached", async () => {
       await stakingContract.stake(1000, 100);
@@ -77,11 +79,23 @@ describe("StakindDapp tests", function () {
     });
     it("gives the user the claimable balance", async () => {
       await stakingContract.stake(1000, 100);
+      await stakingContract.addRewards(200000);
 
-      await network.provider.send("evm_increaseTime", [100]);
+      await network.provider.send("evm_increaseTime", [60 * 60 * 24 * 365]);
       await network.provider.request({ method: "evm_mine", params: [] });
       const reward = await stakingContract.getTokensToBeClaimed();
-      expect(reward.toString()).to.equal("1000");
+      expect(reward.toString()).to.equal("2000");
+    });
+    it("adds rewards to the contract", async () => {
+      await stakingContract.addRewards(10000);
+      const balance = await stakingContract.totalRewardAmount();
+      expect(balance.toString()).to.equal("10000");
+    });
+    it("calculated the apy", async function () {
+      await stakingContract.stake(2000, 100);
+      await stakingContract.addRewards(200000);
+      const apy = await stakingContract.apy();
+      expect(apy.toString()).to.equal("100");
     });
   });
 });

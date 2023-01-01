@@ -13,6 +13,7 @@
   flex-direction: row;
   padding: 20px;
   background-color: #607eaa;
+  box-shadow: 10px 10px 10px rgba(0, 0, 0, 0.5);
 }
 
 .footer {
@@ -21,12 +22,7 @@
   background-color: #607eaa;
   justify-content: center;
   align-items: center;
-}
-
-.image {
-  width: 70%;
-  height: 50%;
-  margin-left: 20%;
+  box-shadow: 10px 10px 10px rgba(0, 0, 0, 0.5);
 }
 
 .input {
@@ -45,12 +41,6 @@
   color: #0a2647;
 }
 
-.description {
-  line-height: 1;
-  margin: 2rem 0;
-  font-size: 1.2rem;
-}
-
 .button {
   border-radius: 8px;
   background-color: #1c3879;
@@ -66,10 +56,29 @@
   margin-right: 6%;
 }
 
+.getButton {
+  border-radius: 8px;
+  background-color: #1c3879;
+  border: none;
+  color: #ffffff;
+  font-size: 15px;
+  padding: 5px;
+  width: 140px;
+  height: 50px;
+  cursor: pointer;
+  margin-bottom: 2%;
+  margin-top: 6%;
+  margin-left: 6%;
+  margin-right: 6%;
+}
+
 .label {
   padding: 20px;
   display: flex;
   flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  color: #0a2647;
 }
 
 .connect {
@@ -91,20 +100,37 @@
   background-color: #9ea1d4;
 }
 
-.form {
+.middle {
   background-color: #607eaa;
   margin: 2% 2%;
   padding: 2rem;
   display: flex;
   flex-direction: column;
+
   border-radius: 8px;
   font-family: "Roboto", sans-serif;
+  box-shadow: 10px 10px 10px rgba(0, 0, 0, 0.5);
 }
 
 .form1 {
   display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.form2 {
+  display: flex;
   flex-direction: row;
-  justify-content: space-around;
+  justify-content: center;
+}
+
+.form {
+  background-color: #eafdfc;
+  box-shadow: 10px 10px 10px rgba(0, 0, 0, 0.5);
+  border-style: solid 1px;
+  border-radius: 8px;
+  margin: 0 35%;
+  padding: 40px;
 }
 
 .list {
@@ -126,11 +152,13 @@
   background-color: #9ea1d4;
 }
 
-@media (max-width: 1000px) {
-  .main {
-    width: 100%;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-  }
+.getButton:hover {
+  background-color: #9ea1d4;
+}
+
+.apy {
+  text-align: center;
+  font-size: 2rem;
+  color: #0a2647;
+  padding: 1rem;
 }
