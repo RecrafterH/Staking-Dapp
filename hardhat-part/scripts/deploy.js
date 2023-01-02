@@ -19,9 +19,13 @@ const main = async function () {
     stakingdappContract.address,
     10000000
   );
+  const tx1 = await bluedogContract.transfer(
+    "0x70997970c51812dc3a010c7d01b50e0d17dc79c8",
+    100000
+  );
 };
-// bluedog 0x5FbDB2315678afecb367f032d93F642f64180aa3
-// stake 0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512
+// bluedog 0xdc95Ce17396E2015d2177eDcf786e735eA87eAC1
+// stake 0x39a845E380Bd4250fFac145e0AeeddaB5B93C653
 main()
   .then(() => process.exit(0))
   .catch((error) => {

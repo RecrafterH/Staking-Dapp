@@ -74,7 +74,6 @@ export default function Home() {
   };
 
   const getStakedTokenBalance = async () => {
-    console.log("hey");
     try {
       const provider = await getProviderOrSigner();
       const stakeContract = new Contract(
@@ -89,6 +88,7 @@ export default function Home() {
       document.getElementById(
         "tokenAmount"
       ).innerHTML = `You have ${balanceOfBluedogToken}  token staked`;
+      console.log(balance.toString());
       getTimeUntilWithdraw();
       getClaimableToken();
       getApy();
@@ -110,6 +110,7 @@ export default function Home() {
         provider
       );
       const time = await stakeContract.withdrawTimeLeft();
+      console.log(time.toString());
       setTimeUntilUntlock(time);
       document.getElementById(
         "timeToStake"
@@ -152,18 +153,18 @@ export default function Home() {
   const getApy = async () => {
     try {
       const provider = await getProviderOrSigner();
+      console.log(provider.address);
       const stakeContract = new Contract(
         STAKING_CONTRACT_ADDRESS,
         STAKING_CONTRACT_ABI,
         provider
       );
-      console.log("APY");
+
       const apy = await stakeContract.apy();
       const newApy = apy.toString();
 
       setStakeApy(newApy);
 
-      console.log(stakeApy);
       document.getElementById(
         "stakingApy"
       ).innerHTML = `Stake your BlueDog token and earn an Apy of ${stakeApy} %`;
@@ -183,10 +184,10 @@ export default function Home() {
       );
       const amount = document.getElementById("stakeAmount").value;
       const newAmount = Number(amount);
-      console.log(typeof newAmount, newAmount);
+
       const time = document.getElementById("stakeTime").value;
       const tx = await stakeContract.stake(amount, time);
-      console.log("i am here");
+
       setLoading(true);
       await tx.wait();
       setLoading(false);
@@ -211,7 +212,6 @@ export default function Home() {
         signer
       );
       const tx = await stakeContract.claim();
-      console.log("hello");
       setLoading(true);
       await tx.wait();
       setLoading(false);
@@ -308,6 +308,7 @@ export default function Home() {
         <div className={styles.apy} id="stakingApy">
           Stake your BlueDog token and earn an Apy of 0 %
         </div>
+
         <div className={styles.form}>
           <div className={styles.form1}>
             <label className={styles.label}>
@@ -339,6 +340,7 @@ export default function Home() {
             </button>
           </div>
         </div>
+
         <div className={styles.form2}>
           <button
             onClick={getStakedTokenBalance}
@@ -348,7 +350,6 @@ export default function Home() {
             Get balance
           </button>
         </div>
-
         <div className={styles.list}>
           <div className={styles.result} id="tokenAmount">
             Amount of Tokens
@@ -360,6 +361,7 @@ export default function Home() {
             Tokens to claim
           </div>
         </div>
+
         {isOwner ? (
           <div>
             {loading ? (

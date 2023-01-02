@@ -1,5 +1,5 @@
 export const TOKEN_CONTRACT_ADDRESS =
-  "0xE6E340D132b5f46d1e472DebcD681B2aBc16e57E";
+  "0x5FbDB2315678afecb367f032d93F642f64180aa3";
 export const TOKEN_CONTRACT_ABI = [
   {
     inputs: [
@@ -75,7 +75,7 @@ export const TOKEN_CONTRACT_ABI = [
   },
 ];
 export const STAKING_CONTRACT_ADDRESS =
-  "0xc3e53F4d16Ae77Db1c982e75a937B9f60FE63690";
+  "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512";
 export const STAKING_CONTRACT_ABI = [
   {
     inputs: [
