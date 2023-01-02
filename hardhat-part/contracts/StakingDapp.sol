@@ -32,7 +32,7 @@ contract StakingDapp {
     mapping(address => uint256) public startingClaim;
     mapping(address => uint256) public stakeTimestamp;
 
-    uint256 public apy = 1;
+    uint256 public apy;
 
     event Stake(address indexed sender, uint256 amount);
 
@@ -72,7 +72,7 @@ contract StakingDapp {
     }
 
     modifier onlyOwner() {
-        require(msg.sender == owner);
+        require(msg.sender == owner, "Not the owner");
         _;
     }
 
@@ -86,19 +86,8 @@ contract StakingDapp {
     }
 
     function claim() public tokenStaked {
-        if (block.timestamp > deadlines[msg.sender]) {
-            uint256 stakedAmount = balances[msg.sender];
-            uint256 timeStaked = (deadlines[msg.sender] -
-                startingClaim[msg.sender]);
-            uint256 rewardAmount = ((stakedAmount) * ((timeStaked) * apy)) /
-                100 /
-                365 /
-                24 /
-                60 /
-                60;
-            console.log(rewardAmount);
-            balances[msg.sender] += rewardAmount;
-        } else {
+        console.log("You are in the claim fucntion");
+        if (block.timestamp <= deadlines[msg.sender]) {
             uint256 stakedAmount = balances[msg.sender];
             uint256 timeStaked = (block.timestamp - startingClaim[msg.sender]);
             uint256 rewardAmount = ((stakedAmount) * ((timeStaked) * apy)) /
@@ -107,9 +96,29 @@ contract StakingDapp {
                 24 /
                 60 /
                 60;
-            console.log(rewardAmount);
+            console.log("Now you ");
             startingClaim[msg.sender] = block.timestamp;
             balances[msg.sender] += rewardAmount;
+            totalStaked += rewardAmount;
+            calculateApy();
+        } else {
+            console.log("i am in this part");
+            if (startingClaim[msg.sender] < deadlines[msg.sender]) {
+                uint256 stakedAmount = balances[msg.sender];
+                uint256 timeStaked = (deadlines[msg.sender] -
+                    startingClaim[msg.sender]);
+                uint256 rewardAmount = ((stakedAmount) * ((timeStaked) * apy)) /
+                    100 /
+                    365 /
+                    24 /
+                    60 /
+                    60;
+                console.log(rewardAmount);
+                startingClaim[msg.sender] = block.timestamp;
+                balances[msg.sender] += rewardAmount;
+                totalStaked += rewardAmount;
+                calculateApy();
+            }
         }
     }
 
@@ -129,7 +138,8 @@ contract StakingDapp {
     }
 
     function withdrawAll() external onlyOwner {
-        bool success = bluedog.transfer(msg.sender, totalRewardAmount);
+        uint256 balance = bluedog.balanceOf(address(this));
+        bool success = bluedog.transfer(msg.sender, balance);
         require(success, "Transaction failed");
     }
 
@@ -138,16 +148,31 @@ contract StakingDapp {
     }
 
     function getTokensToBeClaimed() public view returns (uint256) {
-        uint256 stakedAmount = balances[msg.sender];
-        uint256 timeStaked = (block.timestamp - startingClaim[msg.sender]);
-
-        uint256 rewardAmount = ((stakedAmount) * ((timeStaked) * apy)) /
-            100 /
-            365 /
-            24 /
-            60 /
-            60;
-        return rewardAmount;
+        if (block.timestamp > deadlines[msg.sender]) {
+            if (startingClaim[msg.sender] < deadlines[msg.sender]) {
+                uint256 stakedAmount = balances[msg.sender];
+                uint256 timeStaked = (deadlines[msg.sender] -
+                    startingClaim[msg.sender]);
+                uint256 rewardAmount = ((stakedAmount) * ((timeStaked) * apy)) /
+                    100 /
+                    365 /
+                    24 /
+                    60 /
+                    60;
+                return rewardAmount;
+            }
+        } else {
+            uint256 stakedAmount = balances[msg.sender];
+            uint256 timeStaked = (block.timestamp - startingClaim[msg.sender]);
+            uint256 rewardAmount = ((stakedAmount) * ((timeStaked) * apy)) /
+                100 /
+                365 /
+                24 /
+                60 /
+                60;
+            console.log("Now you ");
+            return rewardAmount;
+        }
     }
 
     receive() external payable {}

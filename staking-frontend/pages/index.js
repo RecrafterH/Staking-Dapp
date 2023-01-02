@@ -2,7 +2,7 @@ import Head from "next/head";
 import styles from "../styles/Home.module.css";
 import { BigNumber, Contract, providers, utils } from "ethers";
 import React, { useEffect, useRef, useState } from "react";
-import Web3Modal from "web3modal";
+import Web3Modal, { getProviderInfo } from "web3modal";
 import {
   TOKEN_CONTRACT_ADDRESS,
   TOKEN_CONTRACT_ABI,
@@ -10,6 +10,7 @@ import {
   STAKING_CONTRACT_ABI,
 } from "../constants";
 import { getDisplayName } from "next/dist/shared/lib/utils";
+import { getJsonWalletAddress } from "ethers/lib/utils";
 
 export default function Home() {
   const zero = BigNumber.from(0);
@@ -23,6 +24,7 @@ export default function Home() {
   const web3ModalRef = useRef();
   const ref = useRef(null);
   const ref1 = useRef(null);
+  const ref2 = useRef(null);
 
   const getProviderOrSigner = async (needSigner = false) => {
     const provider = await web3ModalRef.current.connect();
@@ -50,6 +52,27 @@ export default function Home() {
     }
   };
 
+  const getOwner = async () => {
+    try {
+      const provider = await getProviderOrSigner();
+      const stakeContract = new Contract(
+        STAKING_CONTRACT_ADDRESS,
+        STAKING_CONTRACT_ABI,
+        provider
+      );
+      const _owner = await stakeContract.owner();
+
+      const signer = await getProviderOrSigner(true);
+
+      const address = await signer.getAddress();
+      if (address.toLowerCase() === _owner.toLowerCase()) {
+        setIsOwner(true);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   const getStakedTokenBalance = async () => {
     console.log("hey");
     try {
@@ -65,7 +88,7 @@ export default function Home() {
 
       document.getElementById(
         "tokenAmount"
-      ).innerHTML = `You have ${balanceOfBluedogToken} staked`;
+      ).innerHTML = `You have ${balanceOfBluedogToken}  token staked`;
       getTimeUntilWithdraw();
       getClaimableToken();
       getApy();
@@ -115,7 +138,7 @@ export default function Home() {
       setTokensToBeClaimed(reward);
       document.getElementById(
         "rewardToken"
-      ).innerHTML = `You can claim ${tokensToBeClaimed} doggy tokens`;
+      ).innerHTML = `You can claim ${tokensToBeClaimed} token`;
     } catch (err) {
       console.error(err);
       setTokensToBeClaimed(zero);
@@ -188,6 +211,7 @@ export default function Home() {
         signer
       );
       const tx = await stakeContract.claim();
+      console.log("hello");
       setLoading(true);
       await tx.wait();
       setLoading(false);
@@ -214,6 +238,43 @@ export default function Home() {
     }
   };
 
+  const withdrawAllToken = async () => {
+    try {
+      const signer = await getProviderOrSigner(true);
+      const stakeContract = new Contract(
+        STAKING_CONTRACT_ADDRESS,
+        STAKING_CONTRACT_ABI,
+        signer
+      );
+      const tx = await stakeContract.withdrawAll();
+      setLoading(true);
+      await tx.wait();
+      setLoading(false);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const addRewards = async () => {
+    try {
+      const signer = await getProviderOrSigner(true);
+      const stakeContract = new Contract(
+        STAKING_CONTRACT_ADDRESS,
+        STAKING_CONTRACT_ABI,
+        signer
+      );
+      const stakeAmount = document.getElementById("rewardAmount").value;
+
+      const tx = await stakeContract.addRewards(stakeAmount);
+      ref2.current.value = "";
+      setLoading(true);
+      await tx.wait();
+      setLoading(false);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   useEffect(() => {
     if (!walletConnected) {
       web3ModalRef.current = new Web3Modal({
@@ -226,6 +287,7 @@ export default function Home() {
       getStakedTokenBalance();
       getTimeUntilWithdraw();
       getClaimableToken();
+      getOwner();
     }
   });
 
@@ -298,6 +360,39 @@ export default function Home() {
             Tokens to claim
           </div>
         </div>
+        {isOwner ? (
+          <div>
+            {loading ? (
+              <div className={styles.form}>
+                <div className={styles.form2}>
+                  <button className={styles.button}>Loading...</button>
+                </div>
+              </div>
+            ) : (
+              <div className={styles.form}>
+                <label className={styles.label}>
+                  <div>Amount of Staking Rewards:</div>
+                  <input
+                    ref={ref2}
+                    className="input"
+                    type="text"
+                    id="rewardAmount"
+                  />
+                </label>
+                <div className={styles.form2}>
+                  <button className={styles.button} onClick={addRewards}>
+                    Add Staking Rewards
+                  </button>
+                  <button className={styles.button} onClick={withdrawAllToken}>
+                    Withdraw everything
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        ) : (
+          ""
+        )}
       </div>
       <div className={styles.footer}>Made by Recrafter</div>
     </div>
