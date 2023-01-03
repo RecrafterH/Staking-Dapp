@@ -82,12 +82,12 @@ export default function Home() {
         provider
       );
       const balance = await stakeContract.getStakedBalance();
-      const newBalance = balance.toString();
+
       setBalanceOfBluedogToken(balance);
 
       document.getElementById(
         "tokenAmount"
-      ).innerHTML = `You have ${balanceOfBluedogToken}  token staked`;
+      ).innerHTML = `You have ${balance.toString()}  token staked`;
       console.log(balance.toString());
       getTimeUntilWithdraw();
       getClaimableToken();
@@ -153,7 +153,7 @@ export default function Home() {
   const getApy = async () => {
     try {
       const provider = await getProviderOrSigner();
-      console.log(provider.address);
+
       const stakeContract = new Contract(
         STAKING_CONTRACT_ADDRESS,
         STAKING_CONTRACT_ABI,

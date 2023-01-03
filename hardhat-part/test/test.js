@@ -152,5 +152,18 @@ describe("StakindDapp tests", function () {
       await stakingContract.connect(user1).withdraw();
       expect(stakingContract.withdraw()).to.reverted;
     });
+    it("keeps track of different wallets", async () => {
+      await stakingContract.stake(4000, 200);
+      await stakingContract.addRewards(200000);
+      const [deployer, user1, user2] = await ethers.getSigners();
+      bluedogContract.transfer(user1.address, 50000);
+      await stakingContract.connect(user1).stake(1000, 100);
+      const balance1 = await stakingContract.getStakedBalance();
+      const balance2 = await stakingContract
+        .connect(user1.address)
+        .getStakedBalance();
+      expect(balance1.toString()).to.equal("4000");
+      expect(balance2.toString()).to.equal("1000");
+    });
   });
 });
